@@ -23,6 +23,7 @@
 // USER END
 
 #include "DIALOG.h"
+#include "MULTIEDIT.h"
 
 /*********************************************************************
 *
@@ -32,6 +33,7 @@
 */
 #define ID_FRAMEWIN_0  (GUI_ID_USER + 0x00)
 #define ID_CHECKBOX_0  (GUI_ID_USER + 0x01)
+#define ID_MULTIEDIT_0 (GUI_ID_USER + 0x02)
 
 
 // USER START (Optionally insert additional defines)
@@ -45,6 +47,7 @@
 */
 
 // USER START (Optionally insert additional static data)
+extern char storedLCDString[];
 // USER END
 
 /*********************************************************************
@@ -55,6 +58,7 @@ static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
   { FRAMEWIN_CreateIndirect, "MyDialog", ID_FRAMEWIN_0, 0, 0, 432, 260, 0, 0x0, 0 },
   { CHECKBOX_CreateIndirect, "LED0", ID_CHECKBOX_0, 25, 36, 175, 34, 0, 0x0, 0 },
   // USER START (Optionally insert additional widgets)
+  { MULTIEDIT_CreateIndirect, "MultiEdit", ID_MULTIEDIT_0, 30, 80, 200, 100, 0, 0x0, 0 },
   // USER END
 };
 
@@ -73,6 +77,7 @@ static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
 *       _cbDialog
 */
 static void _cbDialog(WM_MESSAGE * pMsg) {
+  WM_HWIN hDlg = pMsg->hWin;  
   WM_HWIN hItem;
   int     NCode;
   int     Id;
@@ -87,6 +92,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
     hItem = WM_GetDialogItem(pMsg->hWin, ID_CHECKBOX_0);
     CHECKBOX_SetText(hItem, "LED 0");
     // USER START (Optionally insert additional code for further widget initialization)
+    hItem = WM_GetDialogItem(pMsg->hWin, ID_MULTIEDIT_0);
     // USER END
     break;
   case WM_NOTIFY_PARENT:
@@ -118,6 +124,30 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
       }
       break;
     // USER START (Optionally insert additional code for further Ids)
+    case ID_MULTIEDIT_0: // Notifications sent by 'Multiedit'
+      switch(NCode) {
+      case WM_NOTIFICATION_CLICKED:
+        // USER START (Optionally insert code for reacting on notification message)
+        hItem = WM_GetDialogItem(pMsg->hWin, ID_MULTIEDIT_0);
+        MULTIEDIT_GetText(hItem, storedLCDString, 100);
+        // USER END
+        break;
+      case WM_NOTIFICATION_RELEASED:
+        // USER START (Optionally insert code for reacting on notification message)
+        hItem = WM_GetDialogItem(pMsg->hWin, ID_MULTIEDIT_0);
+        MULTIEDIT_GetText(hItem, storedLCDString, 100);
+        // USER END
+        break;
+      case WM_NOTIFICATION_VALUE_CHANGED:
+        // USER START (Optionally insert code for reacting on notification message)
+        hItem = WM_GetDialogItem(pMsg->hWin, ID_MULTIEDIT_0);
+        MULTIEDIT_GetText(hItem, storedLCDString, 100);
+        // USER END
+        break;
+      // USER START (Optionally insert additional code for further notification handling)
+      // USER END
+      }
+      break;
     // USER END
     }
     break;

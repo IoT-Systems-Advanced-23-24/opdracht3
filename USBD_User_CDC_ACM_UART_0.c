@@ -62,6 +62,7 @@
 #include "Board_LED.h"
 #include "Driver_USART.h"
 #include <stdlib.h>
+#include "GUI.h"
 
 #define USB_RECEIVE_BUFFER_SIZE (512)
 uint8_t usb_receive_buffer[USB_RECEIVE_BUFFER_SIZE];
@@ -182,41 +183,102 @@ osThreadDef (CDC0_ACM_UART_to_USB_Thread, osPriorityNormal, 1U, 0U);
 #define CMD_BUFFER_SIZE (64)
 uint8_t cmd_buffer[CMD_BUFFER_SIZE];
 int cmd_buffer_cnt=0;
-uint16_t LED_Pins[] = {LED1_Pin, LED2_Pin, LED3_Pin, LED4_Pin, LED5_Pin, LED6_Pin, LED7_Pin, LED8_Pin};
-GPIO_TypeDef* LED_GPIO_Ports[] = {LED1_GPIO_Port, LED2_GPIO_Port, LED3_GPIO_Port, LED4_GPIO_Port, LED5_GPIO_Port, LED6_GPIO_Port, LED7_GPIO_Port, LED8_GPIO_Port};
- 
-void process_AT_command(uint8_t* cmd_buffer) {
-    // Assuming AT command format: AT+LED=<LED_VALUE>\r\n
-    const char* prefix = "AT+LED=";
-    size_t prefix_len = strlen(prefix);
-
-    // Check if the received command starts with the expected prefix
-    if (strncmp((const char*)cmd_buffer, prefix, prefix_len) == 0) {
-        // Extract LED value
-        uint8_t led_value;
-        if (sscanf((const char*)cmd_buffer + prefix_len, "%hhu", &led_value) == 1) {
-            // Process the extracted LED value by setting LEDs
-            for (int i = 0; i < 8; i++) {
-                // Check if the corresponding bit is set (1)
-                switch(led_value & (1 << i)) {
-                    case 1:
-                        // Set the corresponding LED using HAL_GPIO
-                        HAL_GPIO_WritePin(LED_GPIO_Ports[i], LED_Pins[i], GPIO_PIN_SET);
-                        break;
-                    default:
-                        // Clear the corresponding LED using HAL_GPIO
-                        HAL_GPIO_WritePin(LED_GPIO_Ports[i], LED_Pins[i], GPIO_PIN_RESET);
-                        break;
-                }
-            }
-
-            // Respond back to the sender (optional)
-            snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "LED value set to: %hhu\r\n", led_value);
-        }
+char storedLCDString[50] = "";
+void intToBinaryString(int num, char* binaryString, int size) {
+    for (int i = size - 1; i >= 0; i--) {
+        binaryString[i] = (num & 1) + '0';
+        num >>= 1;
     }
+    binaryString[size] = '\0';  // Null-terminate the string
+}
+void storeLCDString(const char* lcdString) {
+    strncpy(storedLCDString, lcdString, sizeof(storedLCDString) - 1);
+    storedLCDString[sizeof(storedLCDString) - 1] = '\0'; // Null-terminate the string
 }
 
+void process_AT_command(uint8_t* cmd_buffer) {
+    if (strncmp((char*)cmd_buffer, "AT+LED", 6) == 0) {
+        int led_value = atoi((char*)&cmd_buffer[6]);
+        if (led_value >= 1 && led_value <= 8) {
+            char binaryString[5];
+            intToBinaryString(led_value, binaryString, sizeof(binaryString) - 1);
 
+            // Assuming LED1, LED2, ..., LED8 are defined as consecutive pins
+            for (int i = 0; i < 8; i++) {
+                if (binaryString[i] == '1') {
+                    // Set the corresponding LED
+                    switch (i + 1) {
+                        case 1:
+                            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+                            break;
+                        case 2:
+                            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+                            break;
+                        case 3:
+                            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+                            break;
+                        case 4:
+                            HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
+                            break;
+                        case 5:
+                            HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
+                            break;
+                        case 6:
+                            HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
+                            break;
+                        case 7:
+                            HAL_GPIO_WritePin(LED7_GPIO_Port, LED7_Pin, GPIO_PIN_SET);
+                            break;
+                        case 8:
+                            HAL_GPIO_WritePin(LED8_GPIO_Port, LED8_Pin, GPIO_PIN_SET);
+                            break;
+                        default:
+                            // Handle unexpected case
+                            break;
+                    }
+                } else {
+                    // Reset the corresponding LED
+                    switch (i + 1) {
+                        case 1:
+                            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 2:
+                            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 3:
+                            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 4:
+                            HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 5:
+                            HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 6:
+                            HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 7:
+                            HAL_GPIO_WritePin(LED7_GPIO_Port, LED7_Pin, GPIO_PIN_RESET);
+                            break;
+                        case 8:
+                            HAL_GPIO_WritePin(LED8_GPIO_Port, LED8_Pin, GPIO_PIN_RESET);
+                            break;
+                        default:
+                            // Handle unexpected case
+                            break;
+                    }
+                }
+            }
+        }
+    }
+if (strncmp((char*)cmd_buffer, "AT+LCD=", 6) == 0) {
+        // Extract the string after "AT+LCD="
+        const char* lcdString = (char*)(cmd_buffer + 6);
+
+        // Store the extracted string
+        storeLCDString(lcdString);
+    }
+}
 
 
 // CDC ACM Callbacks -----------------------------------------------------------
@@ -229,7 +291,7 @@ void USBD_CDC0_ACM_DataReceived (uint32_t len) {
   (void)(len);
  
   //if (ptrUART->GetStatus().tx_busy == 0U) {
-    // Start USB -> UART
+    //Start USB -> UART
     cnt = USBD_CDC_ACM_ReadData(0U, usb_receive_buffer, USB_RECEIVE_BUFFER_SIZE);
     if (cnt > 0) {
       //(void)ptrUART->Send(uart_tx_buf, (uint32_t)(cnt));
