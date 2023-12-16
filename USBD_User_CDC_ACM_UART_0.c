@@ -270,14 +270,71 @@ void process_AT_command(uint8_t* cmd_buffer) {
                 }
             }
         }
+          snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "LED value set to: %d\r\n", led_value);
     }
-if (strncmp((char*)cmd_buffer, "AT+LCD=", 6) == 0) {
+else if (strncmp((char*)cmd_buffer, "AT+LCD=", 6) == 0) {
         // Extract the string after "AT+LCD="
         const char* lcdString = (char*)(cmd_buffer + 6);
 
         // Store the extracted string
         storeLCDString(lcdString);
     }
+else if (strncmp((char*)cmd_buffer, "AT+BUTTON", 9) == 0) {
+    // Check the state of each button
+
+    if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "All buttons are pressed\r\n");
+    }
+
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1, Button 2 and Button 3 are pressed\r\n");
+    }
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1, Button 2 and Button 4 are pressed\r\n");
+    }
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1, Button 3 and Button 4 are pressed\r\n");
+    }
+    else if (HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 2, Button 3 and Button 4 are pressed\r\n");
+    }
+
+
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1 and Button 2 are pressed\r\n");
+    } else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1 and Button 3 are pressed\r\n");
+    }
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1 and Button 4 are pressed\r\n");
+    }
+
+
+    else if (HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 2 and Button 3 are pressed\r\n");
+    }
+    else if (HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 2 and Button 4 are pressed\r\n");
+    }
+
+
+    else if (HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET && HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET){
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 3 and Button 4 are pressed\r\n");
+    }
+
+    else if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 1 is pressed\r\n");
+    } else if (HAL_GPIO_ReadPin(SW2_GPIO_Port, SW2_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 2 is pressed\r\n");
+    } else if (HAL_GPIO_ReadPin(SW3_GPIO_Port, SW3_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 3 is pressed\r\n");
+    } else if (HAL_GPIO_ReadPin(SW4_GPIO_Port, SW4_Pin) == GPIO_PIN_RESET) {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Button 4 is pressed\r\n");
+    }else {
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "No button is pressed\r\n");
+    }
+    ptrUART->Send(uart_tx_buf, strlen((char*)uart_tx_buf));
+	}
 }
 
 
