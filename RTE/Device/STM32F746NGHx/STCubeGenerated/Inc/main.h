@@ -46,6 +46,18 @@ extern "C" {
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+void MX_ETH_Init(void);
+void MX_LTDC_Init(void);
+
+/* USER CODE BEGIN EFP */
+
+/* USER CODE END EFP */
 #define LED2_Pin GPIO_PIN_4
 #define LED2_GPIO_Port GPIOB
 #define LED7_Pin GPIO_PIN_15
@@ -72,19 +84,6 @@ extern "C" {
 #define POT1_GPIO_Port GPIOA
 #define LED5_Pin GPIO_PIN_6
 #define LED5_GPIO_Port GPIOH
-/* USER CODE BEGIN EM */
-
-/* USER CODE END EM */
-
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
-void MX_ETH_Init(void);
-void MX_LTDC_Init(void);
-
-/* USER CODE BEGIN EFP */
-
-/* USER CODE END EFP */
-
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */

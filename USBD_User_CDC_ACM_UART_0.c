@@ -63,6 +63,8 @@
 #include "Driver_USART.h"
 #include <stdlib.h>
 #include "GUI.h"
+#include "Temp.h"
+#include "stm32f7xx_hal_adc.h"
 
 #define USB_RECEIVE_BUFFER_SIZE (512)
 uint8_t usb_receive_buffer[USB_RECEIVE_BUFFER_SIZE];
@@ -278,6 +280,8 @@ else if (strncmp((char*)cmd_buffer, "AT+LCD=", 6) == 0) {
 
         // Store the extracted string
         storeLCDString(lcdString);
+        //send string to terminal
+        snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "LCD string set to: %s\r\n", lcdString);
     }
 else if (strncmp((char*)cmd_buffer, "AT+BUTTON", 9) == 0) {
     // Check the state of each button
@@ -335,6 +339,12 @@ else if (strncmp((char*)cmd_buffer, "AT+BUTTON", 9) == 0) {
     }
     ptrUART->Send(uart_tx_buf, strlen((char*)uart_tx_buf));
 	}
+  else if (strncmp((char*)cmd_buffer, "AT+POT", 6) == 0) {
+    int32_t potValue;
+    ReadPot(&potValue);
+    snprintf((char*)uart_tx_buf, UART_BUFFER_SIZE, "Potentiometer value: %d\r\n", potValue);
+    ptrUART->Send(uart_tx_buf, strlen((char*)uart_tx_buf));
+  }
 }
 
 
